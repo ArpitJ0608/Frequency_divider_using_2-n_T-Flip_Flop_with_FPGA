@@ -1,0 +1,41 @@
+############   VHDL CODE    #####################
+library IEEE;  
+use IEEE.STD_LOGIC_1164.ALL;  
+  
+entity Tfflop is     Generic (N : integer := 3);  
+    Port ( clk : in STD_LOGIC;  
+           T   : in STD_LOGIC;  
+           Y   : inout STD_LOGIC_VECTOR(N-1 downto 0) := (others => '0'));
+ end Tfflop;  
+  
+architecture Behavioral of Tfflop is   signal Q : STD_LOGIC_VECTOR(N-1 downto 0) := (others => '0'); begin  
+  
+    process(clk,T)     begin  
+        if rising_edge(clk) then            
+             if T = '1' then  
+                Q(0) <= not Q(0); -- First flip-flop toggles with each clock pulse                 
+               for i in 1 to N-1 loop                     
+                     Q(i) <= Q(i) xor Q(i-1);  
+                end loop;            
+             end if;  
+        end if;     
+    end process;    
+ Y <= Q;  
+  
+end Behavioral;  
+##############  Constraint File  ##################
+
+## Clock signal set_property -dict { PACKAGE_PIN E3    IOSTANDARD LVCMOS33 } 
+[get_ports {clk }];  
+ 
+#IO_L12P_T1_MRCC_35 Sch=clk100mhz  
+create_clock -add -name sys_clk_pin -period 10.00 -waveform {0 5} [get_ports {clk }];  
+##Switches set_property -dict { PACKAGE_PIN J15   IOSTANDARD LVCMOS33 } [get_ports { T}]; #IO_L24N_T3_RS0_15 Sch=sw[0]  
+ 
+## LEDs                                                                                                                
+ set_property -dict { PACKAGE_PIN K15   IOSTANDARD LVCMOS33 } [get_ports { Y[0] }]; #IO_L24P_T3_RS1_15 Sch=led[1] 
+ 
+set_property -dict { PACKAGE_PIN J13   IOSTANDARD LVCMOS33 } [get_ports { Y[1] }];  
+ 
+#IO_L17N_T2_A25_15 Sch=led[2] set_property -dict { PACKAGE_PIN N14   
+IOSTANDARD LVCMOS33 } [get_ports { Y[2] }]; #IO_L8P_T1_D11_14 Sch=led[3]  
